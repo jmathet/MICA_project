@@ -1,0 +1,27 @@
+Correspondance patient - signal pour les données patients dans la cellule ecg_sig
+Fréquence d’échantillonnage: 1000Hz
+Voies I II III sur ECG
+
+Patient 1: rythme sinusal normal
+Patient 2: rythme sinusal normal
+Patient 3: rythme sinusal + PVC
+Patient 3: rythme sinusal + TV
+Patient 5: rythme sinusal + FV
+
+
+Cellule		Patient
+1		1
+2		5
+3		2
+4		3
+5		4
+6		5
+7		1
+8		4
+9		3
+10		2
+11		3
+12		4
+13		1
+14		5
+15		2
