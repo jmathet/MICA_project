@@ -6,7 +6,7 @@ clear; close all; clc;
 addpath(genpath('.'));
 
 %% Load a signal
-[file,path] = uigetfile('*.mat', 'rt');
+[file,path] = uigetfile('data/ecg_normal_1.mat', 'rt');
 signal = load(fullfile(path, file));
 data = signal.ecg; % Your ecg data
 Fs = signal.Fs; % Sampling frequency
@@ -45,3 +45,31 @@ ylabel('Magnitude');
 title('ECG segment characteristic')
 
 %% Your turn : My new method ! 
+%%% Band-pass filter
+
+low_pass = filter([1 0 0 0 0 0 -1], [1 -1], data); %low_pass filter
+low_pass = filter([1 0 0 0 0 0 -1], [1 -1], low_pass); %sqare
+b = zeros(1,33);
+b(1,1) = -1;
+b(1,17) = 32;
+b(1,18) = -32;
+b(1,32) = 1;
+band_pass = filter(b, [1 1], low_pass);
+
+%%% Derivative
+
+%%% Squared
+
+%%% Moving Window Integration
+
+%%% Thresholding
+
+%%% Locations of
+
+
+
+
+
+
+
+
