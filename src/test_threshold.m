@@ -6,7 +6,7 @@ clear; close all; clc;
 addpath(genpath('.'));
 
 %% Load a signal
-[file,path] = uigetfile('data/ecg_normal_1.mat', 'rt');
+[file,path] = uigetfile('../data/ecg_normal_1.mat', 'rt');
 signal = load(fullfile(path, file));
 data = signal.ecg; % Your ecg data
 Fs = signal.Fs; % Sampling frequency
@@ -46,27 +46,52 @@ title('ECG segment characteristic')
 
 %% Your turn : My new method ! 
 %%% Band-pass filter
-
-low_pass = filter([1 0 0 0 0 0 -1], [1 -1], data); %low_pass filter
-low_pass = filter([1 0 0 0 0 0 -1], [1 -1], low_pass); %sqare
+ecg_1 = filter([1 0 0 0 0 0 -1], [1 -1], data); %low_pass filter
+ecg_1 = filter([1 0 0 0 0 0 -1], [1 -1], ecg_1); %square
 b = zeros(1,33);
 b(1,1) = -1;
 b(1,17) = 32;
 b(1,18) = -32;
 b(1,32) = 1;
-band_pass = filter(b, [1 1], low_pass);
+
+ecg_2 = filter(b, [1 1], ecg_1); %high-pass filter
 
 %%% Derivative
+ b = [1 2 0 -2 -1].*(1/8)*Fs;   
+ecg_3 = filter(b, 1, ecg_2); %derivative filter shifted
 
 %%% Squared
+ecg_4 = ecg_3.^2;
 
 %%% Moving Window Integration
+N = 0.15 * Fs; % double of the width of an average QRS complex = 0.15s = 0.15 * Fs points
+Smwi = (1/N)*conv(ones(1,N),ecg_4);
+figure;
+plot(Smwi);
 
 %%% Thresholding
+% Print BPM
+[bpm, R_ecg_locs] = bpm_threshold(Smwi, th, Fs);
+
+% Figures PQRST
+[segment_ecg, P_ecg_loc, Q_ecg_loc, R_ecg_loc, S_ecg_loc, T_ecg_loc] = ecg_threshold(Smwi, R_ecg_locs, i_seg);
 
 %%% Locations of
 
+time_segment_ecg = (1:length(segment_ecg))/Fs;
 
+figure;
+h = plot(time_segment_ecg, segment_ecg); grid on;
+hold on;
+plot(time_segment_ecg(P_ecg_loc),segment_ecg(P_ecg_loc), '*','Color','red'); text(time_segment_ecg(P_ecg_loc),segment(P_ecg_loc),' P ','Color','red','FontSize',14);
+plot(time_segment_ecg(Q_ecg_loc),segment_ecg(Q_ecg_loc), '*','Color','red'); text(time_segment_ecg(Q_ecg_loc),segment_ecg(Q_ecg_loc),' Q ','Color','red','FontSize',14);
+plot(time_segment_ecg(R_ecg_loc),segment_ecg(R_ecg_loc), '*','Color','red'); text(time_segment_ecg(R_ecg_loc),segment_ecg(R_ecg_loc),' R ','Color','red','FontSize',14);
+plot(time_segment_ecg(S_ecg_loc),segment_ecg(S_ecg_loc), '*','Color','red'); text(time_segment_ecg(S_ecg_loc),segment_ecg(S_ecg_loc),' S ','Color','red','FontSize',14);
+plot(time_segment_ecg(T_ecg_loc),segment_ecg(T_ecg_loc), '*','Color','red'); text(time_segment_ecg(T_ecg_loc),segment_ecg(T_ecg_loc),' T ','Color','red','FontSize',14);
+hold off;
+xlabel('Time (s)');
+ylabel('Magnitude');
+title('ECG segment_ecg characteristic')
 
 
 
