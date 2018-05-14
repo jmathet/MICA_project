@@ -6,7 +6,7 @@ clear; close all; clc;
 addpath(genpath('.'));
 
 %% Load a signal
-[file,path] = uigetfile('../data/ecg_normal_1.mat', 'rt');
+[file,path] = uigetfile('..\data\ecg_normal_1.mat', 'rt');
 signal = load(fullfile(path, file));
 data = signal.ecg; % Your ecg data
 Fs = signal.Fs; % Sampling frequency
@@ -86,45 +86,53 @@ th = mean(Smwi)+0.25*mean(Smwi); % seuil arbitraire
 %[pks, loc] = findpeaks(Smwi);
 
  for i=1:length(Smwi)
-     if (Smwi(1,i) < th)  % on accepte jusqu'à -30% en dessous de la moyenne des 5 derniers
+     if (Smwi(1,i) < th)  
          Smwi(1,i)=0;
      end
  end
- R_loc=[1];
- pks_start=1;
- pks_end=1;
- while j~=length(ecg_2_delay)
-        while ecg_2_delay(1,j)~=0
-            if pks_start < j
-                pks_start=j;
-            end
-            pks_end=j;
-            j=j+1;
-        end
-        if j~=0
-            segment = ecg_2_delay(pks_start:pks_end);
-            [M]
-            R_loc=[R_loc j];
-        end
-        j=j+1;
+ 
+ %%% Locations of R
+ 
+i=1;
+R_locs_PT = [];
+
+ while i<length(ecg_2_delay)
+     if Smwi(i)~=0
+         complex_start = i;
+         j=i;
+         while Smwi(j)~=0
+             j=j+1;
+         end
+         complex_end=j;
+         
+         [max_value max_pos]=max(ecg_2_delay(complex_start:complex_end));
+         R_locs_PT = [R_locs_PT max_pos+complex_start];
+         
+         i=j;
+     else
+        i=i+1;
+     end
+     
+     
  end
+ 
 
  figure;
 hold on; plot(ecg_2_delay/max(ecg_2)); plot(Smwi/max(Smwi)); hold off
  
-%%% Locations of
+
 
  %loc_ecg_th = find(pks);
  %R_ecg_loc = loc(loc_ecg_th);
  
 time_segment_ecg = (1:length(ecg_2_delay))/Fs;
  
- %figure;
- %h = plot(time_segment_ecg, ecg_2_delay); grid on;
+ figure;
+ h = plot(time_segment_ecg, ecg_2_delay); grid on;
  hold on;
 % plot(time_segment_ecg(P_ecg_loc),segment_ecg(P_ecg_loc), '*','Color','red'); text(time_segment_ecg(P_ecg_loc),segment(P_ecg_loc),' P ','Color','red','FontSize',14);
 % plot(time_segment_ecg(Q_ecg_loc),segment_ecg(Q_ecg_loc), '*','Color','red'); text(time_segment_ecg(Q_ecg_loc),segment_ecg(Q_ecg_loc),' Q ','Color','red','FontSize',14);
- %plot(time_segment_ecg(R_ecg_loc),ecg_2_delay(R_ecg_loc), '*','Color','red'); text(ecg_2_delay(R_ecg_loc),ecg_2_delay(R_ecg_loc),' R ','Color','red','FontSize',14);
+plot(time_segment_ecg(R_locs_PT),ecg_2_delay(R_locs_PT), '*','Color','red'); text(ecg_2_delay(R_locs_PT),ecg_2_delay(R_locs_PT),' R ','Color','red','FontSize',14);
 % plot(time_segment_ecg(S_ecg_loc),segment_ecg(S_ecg_loc), '*','Color','red'); text(time_segment_ecg(S_ecg_loc),segment_ecg(S_ecg_loc),' S ','Color','red','FontSize',14);
 % plot(time_segment_ecg(T_ecg_loc),segment_ecg(T_ecg_loc), '*','Color','red'); text(time_segment_ecg(T_ecg_loc),segment_ecg(T_ecg_loc),' T ','Color','red','FontSize',14);
 % hold off;
