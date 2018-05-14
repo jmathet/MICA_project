@@ -81,16 +81,19 @@ ecg_2_delay = conv(ecg_2,delay_vector);% ajout du delai a la sortie du filtre pa
 
 
 %%% Thresholding
-th = mean(Smwi)+0.25*mean(Smwi); % seuil arbitraire
+th = mean(Smwi); % seuil arbitraire
  for i=1:length(Smwi)
      if (Smwi(1,i) < th)  
          Smwi(1,i)=0;
      end
  end
  
- %%% Locations of R
+ %%% Locations of R, Q and S
 i=1;
 R_locs_PT = [];
+Q_locs_PT = [];
+S_locs_PT = [];
+
 while i<length(ecg_2_delay)
      if Smwi(i)~=0 % si on trouve un complexe
          complex_start = i;
@@ -99,11 +102,25 @@ while i<length(ecg_2_delay)
              j=j+1;
          end
          complex_end=j;
-         % on cherche le maximum de l'ECG (asur la largeur totale du complexe
+         
+         % Locations of R inside complex i:j (max search)
          [max_value max_pos]=max(ecg_2_delay(complex_start:complex_end));
          R_locs_PT = [R_locs_PT max_pos+complex_start-1];
-       
-         i=j;
+         
+         % Locations of Q inside complex i:j (previous min search)
+         [min_value min_pos]=max(ecg_2_delay(complex_start:complex_start+max_pos));
+         Q_locs_PT = [Q_locs_PT min_pos+complex_start-1];
+         %[Q_peaks_values Q_peaks_locs] = findpeaks(-ecg_2_delay(complex_start:complex_start+max_pos));
+         %Q_locs_PT = [Q_locs_PT Q_peaks_locs(end)-1];
+         
+         
+         % Locations of S inside complex i:j (next min search)
+         [min_value min_pos]=max(ecg_2_delay(complex_start+max_pos:complex_end));
+         S_locs_PT = [S_locs_PT min_pos+complex_start-1];
+         %[S_peaks_values S_peaks_locs] = findpeaks(-ecg_2_delay(complex_start+max_pos:complex_end));
+         %S_locs_PT = [S_locs_PT S_peaks_locs(1)-1];
+         
+         i=j; % on reprend la recherche après le complexe
      else
         i=i+1;
      end
@@ -123,9 +140,9 @@ time_segment_ecg = (1:length(ecg_2_delay))/Fs;
  h = plot(time_segment_ecg, ecg_2_delay); grid on;
  hold on;
 % plot(time_segment_ecg(P_ecg_loc),segment_ecg(P_ecg_loc), '*','Color','red'); text(time_segment_ecg(P_ecg_loc),segment(P_ecg_loc),' P ','Color','red','FontSize',14);
-% plot(time_segment_ecg(Q_ecg_loc),segment_ecg(Q_ecg_loc), '*','Color','red'); text(time_segment_ecg(Q_ecg_loc),segment_ecg(Q_ecg_loc),' Q ','Color','red','FontSize',14);
 plot(time_segment_ecg(R_locs_PT),ecg_2_delay(R_locs_PT), '*','Color','red'); text(ecg_2_delay(R_locs_PT),ecg_2_delay(R_locs_PT),' R ','Color','red','FontSize',14);
-% plot(time_segment_ecg(S_ecg_loc),segment_ecg(S_ecg_loc), '*','Color','red'); text(time_segment_ecg(S_ecg_loc),segment_ecg(S_ecg_loc),' S ','Color','red','FontSize',14);
+plot(time_segment_ecg(Q_locs_PT),ecg_2_delay(Q_locs_PT), '*','Color','blue'); text(ecg_2_delay(Q_locs_PT),ecg_2_delay(Q_locs_PT),' Q ','Color','blue','FontSize',14);
+plot(time_segment_ecg(S_locs_PT),ecg_2_delay(S_locs_PT), '*','Color','green'); text(ecg_2_delay(S_locs_PT),ecg_2_delay(S_locs_PT),' S ','Color','green','FontSize',14);
 % plot(time_segment_ecg(T_ecg_loc),segment_ecg(T_ecg_loc), '*','Color','red'); text(time_segment_ecg(T_ecg_loc),segment_ecg(T_ecg_loc),' T ','Color','red','FontSize',14);
 % hold off;
  xlabel('Time (s)');
