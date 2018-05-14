@@ -59,7 +59,7 @@ ecg_2 = filter(b1, [1 -1], ecg_1); %high-pass filter
 
 %%% Derivative
  b2 = [1 2 0 -2 -1]*(1/8)*Fs;   
-delay = 2; % delai introduit par la causalité forcée du filtre
+delay = 2; % delai introduit par la causalite forcee du filtre
 ecg_3 = filter(b2, 1, ecg_2); %derivative filter shifted
 delay = delay + 2;
 
@@ -75,9 +75,9 @@ plot(Smwi);
 title('Smwi');
 delay = delay + (N-1)/2; % la fenetre introduit un delai de (N-1)/2
 
-delay_vector = zeros(1,delay); %création du vecteur delai
-delay_vector(1,delay)=1; % mise en place d'un dirac à la position delay
-ecg_2_delay = conv(ecg_2,delay_vector);% ajout du delai à la sortie du filtre passe_bande
+delay_vector = zeros(1,delay); %creation du vecteur delai
+delay_vector(1,delay)=1; % mise en place d'un dirac a la position delay
+ecg_2_delay = conv(ecg_2,delay_vector);% ajout du delai a la sortie du filtre passe_bande
 
 
 %%% Thresholding
@@ -86,7 +86,7 @@ th = mean(Smwi)+0.25*mean(Smwi); % seuil arbitraire
 %[pks, loc] = findpeaks(Smwi);
 
  for i=1:length(Smwi)
-     if (Smwi(1,i) < th)  % on accepte jusqu'à -30% en dessous de la moyenne des 5 derniers
+     if (Smwi(1,i) < th)  % on accepte jusqu'a -30% en dessous de la moyenne des 5 derniers
          Smwi(1,i)=0;
      end
  end
