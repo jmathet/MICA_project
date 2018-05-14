@@ -1,0 +1,12 @@
+https://pastel.archives-ouvertes.fr/pastel-00000571/file/Chapitre3.pdf
+http://combrexelle.perso.enseeiht.fr/sujets/article_ursafe.pdf
+Filtrage passe-bande
+les ondes R ont une énergie maximale dans la bande 5- 15 Hz [Thakor, 1984]. Il est donc naturel de commencer par un filtrage du signal dans cette bande.
+Dérivation
+Le complexe QRS étant bref (entre 0.02 et 0.2 seconde), et de forte amplitude, la dérivée du signal à ce niveau présente des valeurs maximales élevées. On continue donc le traitement du signal par l’application d’un filtre dérivateur numérique
+Carré
+Accentuer le contraste mis en évidence par la dérivation, on élève au carré le signal obtenu, ce qui permet, en outre, d’éliminer le signe et d’assurer la symétrie de détection entre les ondes R et les ondes QS
+Intégration
+Obtenir un maximum unique pour chaque complexe. La taille de la fenêtre d’intégration doit être adaptée à la largeur moyenne d’un complexe QRS. Si elle est trop grande, le maximum est décalé en temps par rapport à la position du R (influence de l’onde T) ; si, au contraire, elle est trop petite, on obtient plusieurs pics pour une même onde R. La taille, choisie ici de manière empirique, est de 0.15 seconde [Pan, 1985] ce qui correspond au double de la largeur moyenne d’un complexe QRS.
+Seuillage
+Le signal disponible possède un maximum absolu pour chaque complexe QRS ; il possède en outre d’autres maximas locaux, de plus faible amplitude en général, qui correspondent soit à du bruit, soit aux ondes T. Cette étape consiste donc en une recherche de maxima capable de ne pas prendre en considération les maxima trop faibles qui peuvent correspondre au bruit en effectuant un seuillage en amplitude et ceux trop proches qui risquent d’être introduits par les ondes T en effectuant un seuillage temporel

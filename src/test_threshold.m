@@ -103,6 +103,7 @@ th = mean(Smwi)+0.25*mean(Smwi); % seuil arbitraire
         end
         if j~=0
             segment = ecg_2_delay(pks_start:pks_end);
+            [M]
             R_loc=[R_loc j];
         end
         j=j+1;
