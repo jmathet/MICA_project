@@ -86,11 +86,7 @@ th = mean(Smwi)+0.25*mean(Smwi); % seuil arbitraire
 %[pks, loc] = findpeaks(Smwi);
 
  for i=1:length(Smwi)
-<<<<<<< HEAD
      if (Smwi(1,i) < th)  
-=======
-     if (Smwi(1,i) < th)  % on accepte jusqu'a -30% en dessous de la moyenne des 5 derniers
->>>>>>> 06b0b186d85d91cd2c6fa204707a2eb9a7f470bc
          Smwi(1,i)=0;
      end
  end
