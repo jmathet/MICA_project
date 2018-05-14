@@ -99,10 +99,11 @@ while i<length(ecg_2_delay)
              j=j+1;
          end
          complex_end=j;
-         % on cherche le maximum de l'ECG (après PB) sur la largeur totale du complexe
+         % on cherche le maximum de l'ECG (asur la largeur totale du complexe
          [max_value max_pos]=max(ecg_2_delay(complex_start:complex_end));
-         R_locs_PT = [R_locs_PT max_pos+complex_start - 1]; %liste des maximums
-         i=j; % on reprend après le complexe
+         R_locs_PT = [R_locs_PT max_pos+complex_start-1];
+       
+         i=j;
      else
         i=i+1;
      end
