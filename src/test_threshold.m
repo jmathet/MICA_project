@@ -110,22 +110,41 @@ while i<length(ecg_2_delay)
          % Locations of Q inside complex i:j (previous min search)
          [min_value min_pos]=min(ecg_2_delay(complex_start:complex_start+max_pos));
          Q_locs_PT = [Q_locs_PT min_pos+complex_start-1];
-         %[Q_peaks_values Q_peaks_locs] = findpeaks(-ecg_2_delay(complex_start:complex_start+max_pos));
-         %Q_locs_PT = [Q_locs_PT Q_peaks_locs(end)-1];
          
          
          % Locations of S inside complex i:j (next min search)
          [min_value min_pos]=min(ecg_2_delay(complex_start+max_pos:complex_end));
          S_locs_PT = [S_locs_PT min_pos+complex_start+max_pos-1];
-         %[S_peaks_values S_peaks_locs] = findpeaks(-ecg_2_delay(complex_start+max_pos:complex_end));
-         %S_locs_PT = [S_locs_PT S_peaks_locs(1)-1];
          
          i=j; % on reprend la recherche après le complexe
      else
         i=i+1;
      end
- end
+end
  
+ %%% Locations of T and P
+delay2 = 0;
+ecg_5 = filter([1 0 0 0 0 0 -1], [1], ecg_2_delay);
+delay2 = delay2 + 3;
+ecg_6 = filter([1 0 0 0 0 0 0 0 -1], [1 -1], ecg_5);
+delay2 = delay2 + 4;
+
+delay_vector = zeros(1,delay); %creation du vecteur delai
+delay_vector(1,delay)=1; % mise en place d'un dirac a la position delay
+ecg_2_delay2 = conv(ecg_2_delay,delay_vector);% ajout du delai a la sortie du filtre passe_bande
+
+T_locs_PT = [];
+for i=1:length(R_locs_PT)-1
+   % Etude de l'intervalle R(i)->R(i+1) 
+   RR_start = R_locs_PT(i);
+   RR_end = round(R_locs_PT(i+1)*0.7);
+   [maxs_value maxs_pos] = findpeaks(ecg_6(RR_start:RR_end));
+   [max_value max_pos] = max(ecg_2_delay(RR_start+maxs_pos));
+   max_pos = R_locs_PT(RR_start+max_pos);
+   T_locs_PT = [T_locs_PT max_pos-1];
+end
+
+
 figure;
 hold on; plot(ecg_2_delay/max(ecg_2)); plot(Smwi/max(Smwi)); hold off
  
@@ -143,14 +162,8 @@ time_segment_ecg = (1:length(ecg_2_delay))/Fs;
 plot(time_segment_ecg(R_locs_PT),ecg_2_delay(R_locs_PT), '*','Color','red'); text(ecg_2_delay(R_locs_PT),ecg_2_delay(R_locs_PT),' R ','Color','red','FontSize',14);
 plot(time_segment_ecg(Q_locs_PT),ecg_2_delay(Q_locs_PT), '*','Color','blue'); text(ecg_2_delay(Q_locs_PT),ecg_2_delay(Q_locs_PT),' Q ','Color','blue','FontSize',14);
 plot(time_segment_ecg(S_locs_PT),ecg_2_delay(S_locs_PT), '*','Color','green'); text(ecg_2_delay(S_locs_PT),ecg_2_delay(S_locs_PT),' S ','Color','green','FontSize',14);
-% plot(time_segment_ecg(T_ecg_loc),segment_ecg(T_ecg_loc), '*','Color','red'); text(time_segment_ecg(T_ecg_loc),segment_ecg(T_ecg_loc),' T ','Color','red','FontSize',14);
+ plot(time_segment_ecg(T_locs_PT),ecg_2_delay(T_locs_PT), '*','Color','red'); text(ecg_2_delay(T_locs_PT),ecg_2_delay(T_locs_PT),' T ','Color','red','FontSize',14);
 % hold off;
  xlabel('Time (s)');
  ylabel('Magnitude');
  title('ECG segment_ecg characteristic')
-
-
-
-
-
-
