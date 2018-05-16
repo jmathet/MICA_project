@@ -14,35 +14,35 @@ N = size(data,2); % Data length
 time_axis = (1:N)/Fs;
 
 %% Threshold method
-th = 200; % threshold
-i_seg = 10; % Segment number to plot
-
-% Time plot
-figure;
-plot(time_axis, data); grid on;
-hold on; plot(time_axis, th*ones(1,N), 'red');
-xlabel('Time (s)');
-ylabel('Magnitude');
-title('Time evolution of the loaded signal')
-
-% Print BPM
-[bpm, R_locs] = bpm_threshold(data, th, Fs);
-% Figures PQRST
-[segment, P_loc, Q_loc, R_loc, S_loc, T_loc] = ecg_threshold(data, R_locs, i_seg);
-time_segment = (1:length(segment))/Fs;
-
-figure;
-h = plot(time_segment, segment); grid on;
-hold on;
-%plot(time_segment(P_loc),segment(P_loc), '*','Color','red'); text(time_segment(P_loc),segment(P_loc),' P ','Color','red','FontSize',14);
-%plot(time_segment(Q_loc),segment(Q_loc), '*','Color','red'); text(time_segment(Q_loc),segment(Q_loc),' Q ','Color','red','FontSize',14);
-%plot(time_segment(R_loc),segment(R_loc), '*','Color','red'); text(time_segment(R_loc),segment(R_loc),' R ','Color','red','FontSize',14);
-%plot(time_segment(S_loc),segment(S_loc), '*','Color','red'); text(time_segment(S_loc),segment(S_loc),' S ','Color','red','FontSize',14);
-plot(time_segment(T_loc),segment(T_loc), '*','Color','red'); text(time_segment(T_loc),segment(T_loc),' T ','Color','red','FontSize',14);
-hold off;
-xlabel('Time (s)');
-ylabel('Magnitude');
-title('ECG segment characteristic')
+% th = 200; % threshold
+% i_seg = 10; % Segment number to plot
+% 
+% % Time plot
+% figure;
+% plot(time_axis, data); grid on;
+% hold on; plot(time_axis, th*ones(1,N), 'red');
+% xlabel('Time (s)');
+% ylabel('Magnitude');
+% title('Time evolution of the loaded signal')
+% 
+% % Print BPM
+% [bpm, R_locs] = bpm_threshold(data, th, Fs);
+% % Figures PQRST
+% [segment, P_loc, Q_loc, R_loc, S_loc, T_loc] = ecg_threshold(data, R_locs, i_seg);
+% time_segment = (1:length(segment))/Fs;
+% 
+% figure;
+% h = plot(time_segment, segment); grid on;
+% hold on;
+% %plot(time_segment(P_loc),segment(P_loc), '*','Color','red'); text(time_segment(P_loc),segment(P_loc),' P ','Color','red','FontSize',14);
+% %plot(time_segment(Q_loc),segment(Q_loc), '*','Color','red'); text(time_segment(Q_loc),segment(Q_loc),' Q ','Color','red','FontSize',14);
+% %plot(time_segment(R_loc),segment(R_loc), '*','Color','red'); text(time_segment(R_loc),segment(R_loc),' R ','Color','red','FontSize',14);
+% %plot(time_segment(S_loc),segment(S_loc), '*','Color','red'); text(time_segment(S_loc),segment(S_loc),' S ','Color','red','FontSize',14);
+% plot(time_segment(T_loc),segment(T_loc), '*','Color','red'); text(time_segment(T_loc),segment(T_loc),' T ','Color','red','FontSize',14);
+% hold off;
+% xlabel('Time (s)');
+% ylabel('Magnitude');
+% title('ECG segment characteristic')
 
 %% Your turn : My new method ! 
 %%% Band-pass filter
@@ -60,9 +60,9 @@ delay_bandpass = delay_bandpass + 16; % ajout du delai du filtre passe haut
 
 %%% Derivative
  b2 = [1 2 0 -2 -1]*(1/8)*Fs;   
-delay = delay_bandpass; % delai introduit par la causalite forcee du filtre %modifier le commentaire
+delay_PT = delay_bandpass; % delai introduit par la causalite forcee du filtre %modifier le commentaire
 ecg_3 = filter(b2, 1, ecg_2); %derivative filter shifted
-delay = delay + 2; % delai introduit par le filtre derivant
+delay_PT = delay_PT + 2; % delai introduit par le filtre derivant
 
 %%% Squared
 ecg_4 = ecg_3.^2;
@@ -71,14 +71,16 @@ ecg_4 = ecg_3.^2;
 N = 0.15 * Fs -1; % double of the width of an average QRS complex = 0.15s = 0.15 * Fs points
 % -1 pour avoir un delay entier lorsqu'on calcule le delai
 Smwi = (1/N)*conv(ones(1,N),ecg_4);
+Smwi = Smwi(1:length(data)); % troncature
 figure;
 plot(Smwi);
 title('Smwi');
-delay = delay + (N-1)/2; % la fenetre introduit un delai de (N-1)/2
+delay_PT = delay_PT + (N-1)/2; % la fenetre introduit un delai de (N-1)/2
 
-delay_vector = zeros(1,delay); %creation du vecteur delai
-delay_vector(1,delay)=1; % mise en place d'un dirac a la position delay
-data_delay = conv(data,delay_vector);% ajout du delai aux donnees (data)
+delay_vector_PT = zeros(1,delay_PT); %creation du vecteur delai
+delay_vector_PT(1,delay_PT)=1; % mise en place d'un dirac a la position delay
+data_delay_PT = conv(data,delay_vector_PT);% ajout du delai aux donnees (data)
+data_delay_PT = data_delay_PT(1:length(data)); % troncature
 
 
 %%% Thresholding
@@ -89,6 +91,10 @@ th = mean(Smwi); % seuil arbitraire => la moyenne
      end
  end
  
+ % comparaison  du signal ecg brut(data) et apres traitement
+figure;
+hold on; plot(data_delay_PT()/max(data_delay_PT)); plot(Smwi/max(Smwi)); hold off
+
  %%% Locations of R, Q and S directement sur les data
 i=1;
 R_locs_PT = [];
@@ -104,17 +110,17 @@ while i<length(Smwi)
          end
          complex_end=j;
          
-         % Locations of R inside complex i:j (max search)
-         [max_value max_pos]=max(data_delay(complex_start:complex_end));
+         % Locations of R inside complex i:j (max search in data_delay_PT)
+         [max_value max_pos]=max(data_delay_PT(complex_start:complex_end));
          R_locs_PT = [R_locs_PT max_pos+complex_start-1];
          
          % Locations of Q inside complex i:j (previous min search)
-         [min_value min_pos]=min(data_delay(complex_start:complex_start+max_pos));
+         [min_value min_pos]=min(data_delay_PT(complex_start:complex_start+max_pos));
          Q_locs_PT = [Q_locs_PT min_pos+complex_start-1];
          
          
          % Locations of S inside complex i:j (next min search)
-         [min_value min_pos]=min(data_delay(complex_start+max_pos:complex_end));
+         [min_value min_pos]=min(data_delay_PT(complex_start+max_pos:complex_end));
          S_locs_PT = [S_locs_PT min_pos+complex_start+max_pos-1];
          
          i=j; % on reprend la recherche apres le complexe
@@ -122,55 +128,80 @@ while i<length(Smwi)
         i=i+1;
      end
 end
+
+R_locs_PT = R_locs_PT(1:(end-delay_PT)); % on tronque le dernier car le signal ne se termine pas sur un pic R (faux positif)
  
-% comparaison  du signal ecg brut(data) et apres traitement
-figure;
-hold on; plot(data_delay()/max(data_delay)); plot(Smwi/max(Smwi)); hold off
+ %compensation du retard : positions correspondantes sur data
+R_locs = R_locs_PT - delay_PT + 1;
+Q_locs = Q_locs_PT - delay_PT + 1;
+S_locs = S_locs_PT - delay_PT + 1;
+
 
 
 
  %%% Locations of T and P
-delay2 = 0;
+delay_T_P = 0; % reference data
 ecg_5 = filter([1 0 0 0 0 0 -1], [1], data);
-delay2 = delay2 + 3;
+delay_T_P = delay_T_P + 3;
 ecg_6 = filter([1 0 0 0 0 0 0 0 -1], [1 -1], ecg_5);
-delay2 = delay2 + 4;
+delay_T_P = delay_T_P + 4;
 
-delay2_vector = zeros(1,delay2); % creation du vecteur delai
-delay2_vector(1,delay2)=1; % mise en place d'un dirac a la position delay2
-data_delay2 = conv(data,delay2_vector);% ajout du delai aux donnees brut (data)
+delay_vector_T_P = zeros(1,delay_T_P); % creation du vecteur delai
+delay_vector_T_P(1,delay_T_P)=1; % mise en place d'un dirac a la position delay_T_P
+data_delay_T_P = conv(data,delay_vector_T_P);% ajout du delai aux donnees brut (data)
+data_delay_T_P = data_delay_T_P(1:length(data)); % troncature pour retirer les derniers points ajoutes 
 
-% comparaison  du signal ecg brut(data) et apres traitement
+% comparaison  du signal ecg brut decale (data_delay_T_P) et le signal apres traitement
 figure;
-hold on; plot(data_delay2/max(data_delay2)); plot(ecg_6/max(ecg_6)); hold off
+hold on; plot(data_delay_T_P/max(data_delay_T_P)); plot(ecg_6/max(ecg_6)); hold off
 
 T_locs_new = [];
-for i=1:length(R_locs_PT)-1
+for i=1:length(R_locs)-1
+   temp_loc = [];
    % Etude de l'intervalle R(i)->R(i+1) 
-   RR_start = S_locs_PT(i);
-   RR_end = R_locs_PT(i) + round((R_locs_PT(i+1)-R_locs_PT(i))*0.7);
-   [maxs_value, maxs_pos] = findpeaks(ecg_6(RR_start:RR_end));
-   [max_value, max_pos] = max(ecg_2_delay(RR_start+maxs_pos));
-   max_pos = RR_start + max_pos;
-   T_locs_new = [T_locs_new max_pos-1];
+   RR_start = R_locs(i) + round((R_locs(i+1)-R_locs(i))*0.2)+ delay_T_P; 
+   RR_end = R_locs(i) + round((R_locs(i+1)-R_locs(i))*0.7) + delay_T_P;
+   for j=RR_start:RR_end
+       if (ecg_6(j)*ecg_6(j+1)<0)
+            temp_loc = [temp_loc j];
+       end
+   end
+   [max_value, max_pos] = max(data_delay_T_P(temp_loc));
+   T_locs_new = [T_locs_new temp_loc(max_pos)];
 end
 
+T_locs  = T_locs_new - delay_T_P +1;
 
-%figure;
-%hold on; plot(ecg_2_delay2/max(ecg_2_delay2)); plot(ecg_6/max(ecg_6)); hold off
+
+P_locs_new = [];
+for i=1:length(R_locs)-1
+   temp_loc = [];
+   % Etude de l'intervalle R(i)->R(i+1) 
+   RR_start = R_locs(i) - round((R_locs(i+1)-R_locs(i))*0.3) + delay_T_P; 
+   RR_end = R_locs(i) - round((R_locs(i+1)-R_locs(i))*0.1) + delay_T_P;
+   for j=RR_start:RR_end
+       if (ecg_6(j)*ecg_6(j+1)<0)
+            temp_loc = [temp_loc j];
+       end
+   end
+   [max_value, max_pos] = max(data_delay_T_P(temp_loc));
+   P_locs_new = [P_locs_new temp_loc(max_pos)];
+end
+
+P_locs  = P_locs_new - delay_T_P +1;
 
 % % plot final de l'ecg avec les points trouves
-%  figure;
-% time_segment = (1:length(data_delay))/Fs;
-%  h = plot(time_segment, data_delay); grid on;
-%  hold on;
-% % plot(time_segment_ecg(P_ecg_loc),segment_ecg(P_ecg_loc), '*','Color','red'); text(time_segment_ecg(P_ecg_loc),segment(P_ecg_loc),' P ','Color','red','FontSize',14);
-% plot(time_segment(R_locs_PT),data_delay(R_locs_PT), '*','Color','red'); text(data_delay(R_locs_PT),data_delay(R_locs_PT),' R ','Color','red','FontSize',14);
-% plot(time_segment(Q_locs_PT),data_delay(Q_locs_PT), '*','Color','blue'); text(data_delay(Q_locs_PT),data_delay(Q_locs_PT),' Q ','Color','blue','FontSize',14);
-% plot(time_segment(S_locs_PT),data_delay(S_locs_PT), '*','Color','green'); text(data_delay(S_locs_PT),data_delay(S_locs_PT),' S ','Color','green','FontSize',14);
-% %plot(time_segment_ecg(T_locs_PT),ecg_2_delay(T_locs_PT), '*','Color','red'); text(ecg_2_delay(T_locs_PT),ecg_2_delay(T_locs_PT),' T ','Color','red','FontSize',14);
-%  hold off;
-%  xlabel('Time (s)');
-%  ylabel('Magnitude');
-%  title('ECG segment_ecg characteristic');
-%  xlim([560 565]);
+ figure;
+ time_segment = (1:length(data))/Fs;
+  h = plot(time_segment, data); grid on;
+  hold on;
+  plot(time_segment(P_locs),data(P_locs), '*','Color','red');
+  plot(time_segment(R_locs),data(R_locs), '*','Color','red'); 
+  plot(time_segment(Q_locs),data(Q_locs), '*','Color','blue');
+  plot(time_segment(S_locs),data(S_locs), '*','Color','green');
+  plot(time_segment(T_locs),data(T_locs), '*','Color','red');
+  hold off;
+  xlabel('Time (s)');
+  ylabel('Magnitude');
+  title('ECG segment ecg characteristic');
+  xlim([560 563]);
