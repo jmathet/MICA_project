@@ -2,6 +2,7 @@ https://pastel.archives-ouvertes.fr/pastel-00000571/file/Chapitre3.pdf
 http://combrexelle.perso.enseeiht.fr/sujets/article_ursafe.pdf
 Filtrage passe-bande
 les ondes R ont une énergie maximale dans la bande 5- 15 Hz [Thakor, 1984]. Il est donc naturel de commencer par un filtrage du signal dans cette bande.
+ATTENTION : le filtre passe-bande modifie l'amplitude du signal ! il ne faut donc pas l'utiliser ensuite ! 
 Dérivation
 Le complexe QRS étant bref (entre 0.02 et 0.2 seconde), et de forte amplitude, la dérivée du signal à ce niveau présente des valeurs maximales élevées. On continue donc le traitement du signal par l’application d’un filtre dérivateur numérique
 Carré
