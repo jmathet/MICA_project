@@ -45,6 +45,8 @@ time_axis = (1:N)/Fs;
 % title('ECG segment characteristic')
 
 %% Your turn : My new method ! 
+figure;
+ plot(time_axis, data); 
 %%% Band-pass filter
 ecg_1 = filter([1 0 0 0 0 0 -1], [1 -1], data); %low_pass filter
 ecg_1 = filter([1 0 0 0 0 0 -1], [1 -1], ecg_1); %square
@@ -105,7 +107,7 @@ while i<length(Smwi)
      if Smwi(i)~=0 % si on trouve un complexe
          complex_start = i;
          j=i;
-         while Smwi(j)~=0 % on va chercher la fin du complexe
+         while (Smwi(j)~=0 && j<length(Smwi))% on va chercher la fin du complexe et on verifie de ne pas sortir de l'interval des donnes
              j=j+1;
          end
          complex_end=j;
@@ -177,7 +179,9 @@ P_locs_new = [];
 for i=1:length(R_locs)-1
    temp_loc = [];
    % Etude de l'intervalle R(i)->R(i+1) 
-   RR_start = R_locs(i) - round((R_locs(i+1)-R_locs(i))*0.3) + delay_T_P; 
+   RR_start = R_locs(i) - round((R_locs(i+1)-R_locs(i))*0.25) + delay_T_P; %reduction de l'interval
+   % de recherche de 30% a 25% car peu de change de trouver P dans les 5%
+   % (reduit les erreurs
    RR_end = R_locs(i) - round((R_locs(i+1)-R_locs(i))*0.1) + delay_T_P;
    for j=RR_start:RR_end
        if (ecg_6(j)*ecg_6(j+1)<0)
@@ -196,12 +200,25 @@ P_locs  = P_locs_new - delay_T_P +1;
   h = plot(time_segment, data); grid on;
   hold on;
   plot(time_segment(P_locs),data(P_locs), '*','Color','red');
-  plot(time_segment(R_locs),data(R_locs), '*','Color','red'); 
+    text(time_segment(P_locs),data(P_locs),' P ','Color','red','FontSize',14);
+  plot(time_segment(R_locs),data(R_locs), '*','Color','magenta'); 
+    text(time_segment(R_locs),data(R_locs),' R ','Color','magenta','FontSize',14);
   plot(time_segment(Q_locs),data(Q_locs), '*','Color','blue');
+    text(time_segment(Q_locs),data(Q_locs),' Q ','Color','blue','FontSize',14);  
   plot(time_segment(S_locs),data(S_locs), '*','Color','green');
-  plot(time_segment(T_locs),data(T_locs), '*','Color','red');
+    text(time_segment(S_locs),data(S_locs),' S ','Color','green','FontSize',14);  
+  plot(time_segment(T_locs),data(T_locs), '*','Color','black');
+    text(time_segment(T_locs),data(T_locs),' T ','Color','black','FontSize',14);  
   hold off;
   xlabel('Time (s)');
   ylabel('Magnitude');
   title('ECG segment ecg characteristic');
-  xlim([560 563]);
+  %xlim([560 563]);
+  
+  
+%%% Ectopic beat 
+RR = []; %vecteurs des intervalles R-R
+for k=3:length(R_locs)
+    RR = [RR R_locs(k)-2*R_locs(k-1)+R_locs(k-2)];
+end
+mean(RR)
