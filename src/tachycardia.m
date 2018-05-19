@@ -1,13 +1,12 @@
 function [ res ] = tachycardia( R_locs, age )
-%TACHYCARDIA ventricular 
+%TACHYCARDIA ventricular en fonction de l'age du patient
 RR = []; %vecteurs des intervalles R-R
 %% estimation du bpm
 for k=1:(length(R_locs)-1)
     RR_temp = abs(R_locs(k+1)-R_locs(k)); 
     RR = [RR RR_temp];
 end
-bpm_estimate = (1/length(R_locs))*sum(RR);
-
+bpm_estimate = (1/length(R_locs))*sum(RR); %moyenne empirique sur les R-R
 %% diagnostic
 res = 0; %resultat negatif
 if(age == 1 && bpm_estimate>160)
