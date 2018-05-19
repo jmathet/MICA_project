@@ -215,10 +215,6 @@ P_locs  = P_locs_new - delay_T_P +1;
   title('ECG segment ecg characteristic');
   %xlim([560 563]);
   
+tachycardia(R_locs, 20)
   
-%%% Ectopic beat 
-RR = []; %vecteurs des intervalles R-R
-for k=3:length(R_locs)
-    RR = [RR R_locs(k)-2*R_locs(k-1)+R_locs(k-2)];
-end
-mean(RR)
+ectopicbeat(R_locs)
