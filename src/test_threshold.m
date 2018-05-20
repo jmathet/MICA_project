@@ -215,6 +215,34 @@ P_locs  = P_locs_new - delay_T_P +1;
   title('ECG segment ecg characteristic');
   %xlim([560 563]);
   
-tachycardia(R_locs, 20)
+%tachycardia(R_locs, 20)
   
-ectopicbeat(R_locs)
+%ectopicbeat(R_locs)
+
+%AtrialFibrillation(R_locs);
+%% bpm estimate
+RR = [];
+for k=1:(length(R_locs)-1)
+    RR_temp = abs(R_locs(k+1)-R_locs(k)); 
+    RR = [RR RR_temp];
+end
+bpm_estimate = (1/length(R_locs))*sum(RR);
+%% statictical
+N=length(R_locs);
+stat_theo = [];
+for k =1:(N-1)
+    temp = 0;
+    for n = 1:N-k-1
+        temp = temp+(RR(n+k)-bpm_estimate)*(RR(n)-bpm_estimate);
+    end
+    stat_theo = [stat_theo (1/N-k-1)*temp];
+end
+%% auto-covariance function of the process RR
+autocor = xcorr(RR);
+autocor = autocor(length(stat_theo):length(autocor));
+%% comparison
+if (autocor<stat_theo)
+    res = 1;
+end
+%close all; hold on; plot(autocor); plot(stat_theo); hold off;
+
