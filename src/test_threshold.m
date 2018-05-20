@@ -12,7 +12,6 @@ data = signal.ecg; % Your ecg data
 Fs = signal.Fs; % Sampling frequency
 N = size(data,2); % Data length
 time_axis = (1:N)/Fs;
-
 %% Threshold method
 % th = 200; % threshold
 % i_seg = 10; % Segment number to plot
@@ -46,7 +45,7 @@ time_axis = (1:N)/Fs;
 
 %% Your turn : My new method ! 
 figure;
- plot(time_axis, data); 
+plot(time_axis, data); 
 %%% Band-pass filter
 ecg_1 = filter([1 0 0 0 0 0 -1], [1 -1], data); %low_pass filter
 ecg_1 = filter([1 0 0 0 0 0 -1], [1 -1], ecg_1); %square
@@ -95,7 +94,11 @@ th = mean(Smwi); % seuil arbitraire => la moyenne
  
  % comparaison  du signal ecg brut(data) et apres traitement
 figure;
-hold on; plot(data_delay_PT()/max(data_delay_PT)); plot(Smwi/max(Smwi)); hold off
+hold on; plot(time_axis, data_delay_PT()/max(data_delay_PT)); 
+plot(time_axis, Smwi/max(Smwi)); 
+hold off;
+title('Comparaison between ECG inital normalized (data normalized) and signal after thresholding normalized (ecg th normalized)');
+legend('data normalized','ecg th normalized');
 
  %%% Locations of R, Q and S directement sur les data
 i=1;
@@ -212,8 +215,8 @@ P_locs  = P_locs_new - delay_T_P +1;
   hold off;
   xlabel('Time (s)');
   ylabel('Magnitude');
-  title('ECG segment ecg characteristic');
-  %xlim([560 563]);
+  title('ECG segment with PQRST waves (source : ecg normal 1.m)');
+  xlim([560 563]);
   
 %tachycardia(R_locs, 20)
   
