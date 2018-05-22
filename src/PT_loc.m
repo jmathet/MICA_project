@@ -37,7 +37,7 @@ for i=1:length(R_locs)-1
    % Etude de l'intervalle R(i)->R(i+1) 
    RR_start = R_locs(i) - round((R_locs(i+1)-R_locs(i))*0.25) + delay_T_P; %reduction de l'interval
    % de recherche de 30% a 25% car peu de change de trouver P dans les 5%
-   % (reduit les erreurs
+   % (reduit les erreurs)
    RR_end = R_locs(i) - round((R_locs(i+1)-R_locs(i))*0.1) + delay_T_P;
    for j=RR_start:RR_end
        if (ecg_6(j)*ecg_6(j+1)<0)
