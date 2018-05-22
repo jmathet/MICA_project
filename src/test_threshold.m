@@ -156,10 +156,6 @@ delay_vector_T_P(1,delay_T_P)=1; % mise en place d'un dirac a la position delay_
 data_delay_T_P = conv(data,delay_vector_T_P);% ajout du delai aux donnees brut (data)
 data_delay_T_P = data_delay_T_P(1:length(data)); % troncature pour retirer les derniers points ajoutes 
 
-% comparaison  du signal ecg brut decale (data_delay_T_P) et le signal apres traitement
-figure;
-hold on; plot(data_delay_T_P/max(data_delay_T_P)); plot(ecg_6/max(ecg_6)); hold off
-
 T_locs_new = [];
 for i=1:length(R_locs)-1
    temp_loc = [];
