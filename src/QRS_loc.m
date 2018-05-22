@@ -64,9 +64,10 @@ while i<length(Smwi)
          R_locs_PT = [R_locs_PT max_pos+complex_start-1];
          
          % Locations of Q inside complex i:j (previous min search)
-         [min_value min_pos]=min(data_delay_PT(complex_start:complex_start+max_pos));
-         Q_locs_PT = [Q_locs_PT min_pos+complex_start-1];
-         
+         if(complex_start+max_pos <= length(data)) % check if they are data to analyse (avoid exceeding indices at the end)
+             [min_value min_pos]=min(data_delay_PT(complex_start:complex_start+max_pos));
+              Q_locs_PT = [Q_locs_PT min_pos+complex_start-1];
+         end    
          
          % Locations of S inside complex i:j (next min search)
          [min_value min_pos]=min(data_delay_PT(complex_start+max_pos:complex_end));
@@ -78,7 +79,7 @@ while i<length(Smwi)
      end
 end
 
-R_locs_PT = R_locs_PT(1:(end-delay_PT)); % on tronque le dernier car le signal ne se termine pas sur un pic R (faux positif)
+% R_locs_PT = R_locs_PT(1:(end-delay_PT)); % on tronque le dernier car le signal ne se termine pas sur un pic R (faux positif)
  
  %compensation du retard : positions correspondantes sur data
 R_locs = R_locs_PT - delay_PT + 1;

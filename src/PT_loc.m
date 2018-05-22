@@ -32,7 +32,7 @@ T_locs  = T_locs_new - delay_T_P +1;
 
 %% P waves location
 P_locs_new = [];
-for i=1:length(R_locs)-1
+for i=2:length(R_locs)-1 % on commence à 2 pour éviter les erreurs dues au fenetrage
    temp_loc = [];
    % Etude de l'intervalle R(i)->R(i+1) 
    RR_start = R_locs(i) - round((R_locs(i+1)-R_locs(i))*0.25) + delay_T_P; %reduction de l'interval
